@@ -58,6 +58,10 @@
 #define CUSTOM_LED_C 0x0F
 #define CUSTOM_LED_D 0x10
 
+#define BOOTING 0xF1
+#define READY 0xF2
+#define RUN 0xF3
+#define EXIT 0xF4
 
 
 // Led strip buffer
@@ -104,6 +108,10 @@ struct LedProperties{
 
 LedProperties led_properties;
 LedProperties last_led_properties;
+
+
+uint8_t arduino_state = BOOTING;
+bool firstCommand = false;
 
 
 Adafruit_NeoPixel leds(LED_STRIP_SIZE+4, 6, NEO_GRB + NEO_KHZ800);
@@ -445,25 +453,8 @@ uint8_t getTypeResponse(uint8_t response[]){
 }
 
 
-void setup() {
-
- leds.begin();
- leds.clear();
- leds.show();
-
- Serial.begin(115200);
- Serial.setTimeout(200);
-
- while (!Serial){};
-
-}
-
-
-
-
-
-void loop() {
-
+void updateLedProperties(){
+  
  int state = -1;
  uint8_t res[10] = {};
 
@@ -471,12 +462,15 @@ void loop() {
 
  if (state == RESPONSE_OK){
 
+
     uint8_t type = getTypeResponse(res);
     
     if (type == COMMAND_RESPONSE)
         clearLeds();
   
     if (type != SAME_RESPONSE || type != RETURN_RESPONSE){
+
+        firstCommand = true;
         last_led_properties = led_properties;
         
         led_properties.command  = res[0];
@@ -489,8 +483,16 @@ void loop() {
 
     if(type == RETURN_RESPONSE)
         Serial.print(led_properties.command); 
- }
 
+        
+ }  
+  
+  
+}
+
+
+void runLeds(){
+  
  switch(led_properties.command){
 
   case FOWARD:       moveLeds("foward");     break;
@@ -508,10 +510,77 @@ void loop() {
   case CUSTOM_LED_B: customLed(LED_B, led_properties.color); led_properties = last_led_properties; break;
   case CUSTOM_LED_C: customLed(LED_C, led_properties.color); led_properties = last_led_properties; break;
   case CUSTOM_LED_D: customLed(LED_D, led_properties.color); led_properties = last_led_properties; break;
-
+  case BOOTING: bootingLeds(); break;
+  case READY: readyLeds(); break;
+  case EXIT: exitLeds(); break;
  }
+  
+  
+  }
+
+void setup() {
+
+ leds.begin();
+ leds.clear();
+ leds.show();
+
+ Serial.begin(115200);
+ Serial.setTimeout(200);
+
+ //while (!Serial){};
+
+}
 
 
- updateLeds(20);
+
+void loop() {
+
+
+  switch(arduino_state){
+
+    case BOOTING:
+
+        led_properties.command = BOOTING;
+
+        if(Serial)
+           arduino_state = READY;
+        
+        break;
+    
+    case READY:
+    
+        led_properties.command = READY;
+        
+        updateLedProperties();
+        
+        if(firstCommand)
+          arduino_state = RUN;
+
+        if(!Serial)
+          arduino_state = EXIT;
+     
+        break;
+
+    case RUN:
+        
+        updateLedProperties();
+        firstCommand = false;
+        
+        if(!Serial)
+           arduino_state = EXIT;
+        
+        break;
+
+    case EXIT:
+
+        led_properties.command = EXIT;
+
+        if(Serial)
+          arduino_state = READY;
+  }
+ 
+
+ runLeds();
+ updateLeds(20); //Updated each 20 ms
  
 }
