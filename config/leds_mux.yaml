@@ -1,0 +1,29 @@
+services:
+
+- name    : status
+  service : roboticarts_status/cmd_leds
+  timeout : 0.5
+  priority: 255
+
+- name    : emotion
+  service : roboticarts_emotion/cmd_leds
+  timeout : 0.5
+  priority: 100
+
+- name    : navigation
+  service : roboticarts_navigation/cmd_leds
+  timeout : 0.5
+  priority: 21
+
+- name    : teleop
+  service : roboticarts_teleop/cmd_leds
+  timeout : 0.5
+  priority: 20
+
+- name    : external
+  service : cmd_leds
+  timeout : 0.5
+  priority: 1
+
+
+
