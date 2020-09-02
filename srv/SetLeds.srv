@@ -1,0 +1,5 @@
+string signal
+bool enable
+---
+string message 
+bool success
