@@ -1,5 +1,5 @@
-#ifndef _ROBOTICARTS_LEDS_
-#define _ROBOTICARTS_LEDS_
+#ifndef LEDS_DRIVER_H
+#define LEDS_DRIVER_H
 
 #include "ros/ros.h"
 #include <serial/serial.h>
@@ -8,10 +8,11 @@
 #include "std_srvs/Trigger.h"
 #include <xmlrpcpp/XmlRpcValue.h>
 #include <roboticarts_leds/SetLeds.h>
+#include <roboticarts_leds/SetLight.h>
 #include <ros/console.h>
 
 
-#define FOWARD 0x01
+#define FORWARD 0x01
 #define BACKWARD 0x02
 #define TURN_LEFT 0x03
 #define TURN_RIGHT 0x04
@@ -51,31 +52,24 @@
 
 
 
-class RoboticartsLeds{
+class LedsDriver{
 
     public:
-        RoboticartsLeds(ros::NodeHandle nodehandle);
+        LedsDriver(ros::NodeHandle nodehandle);
         void run();
 
     private:
 
         ros::NodeHandle _nh;
         std::string nodeName;
-        XmlRpc::XmlRpcValue led_signals; 
+        XmlRpc::XmlRpcValue leds_signals; 
 
+        ros::ServiceServer set_light_service;
         ros::ServiceServer set_leds_service;
         ros::ServiceServer get_leds_service;
 
-        struct SignalProperties{
-            std::string  name;
-            std::string  behavior;
-            int zone[2]; 
-            int color[3];
-            int time;
-            int status;
-        };
-
        struct LedProperties{
+            std::string name;
             uint8_t  command;
             uint8_t  init_led;
             uint8_t  end_led;
@@ -91,27 +85,25 @@ class RoboticartsLeds{
         std::string serial_port; 
         int baudrate;
 
-        struct SignalProperties _signal_properties;
-        struct LedProperties _led_properties;
-
         std::string _current_signal = "READY";
 
+        bool setLightCallback(roboticarts_leds::SetLight::Request& req, roboticarts_leds::SetLight::Response& res);
         bool setSignalCallback(roboticarts_leds::SetLeds::Request& req, roboticarts_leds::SetLeds::Response& res);
         bool currentSignalCallback(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& res);
         
         void readRosParams();
 
-        SignalProperties readSignalProperties(std::string signal);
-        int  findSignal(std::string signal);
         std::string setSignal(std::string signal, bool enable);
-        LedProperties getLedProperties(std::string signal);
-        std::string printStatus(int status, std::string signal);
-        int sendMessage(uint8_t message[]);
         int sendSignal(std::string signal);
+        LedProperties getLedProperties(std::string signal);
+        int  findSignal(std::string signal);
+        std::string printStatus(int status, std::string signal);
+        
 
         void openSerialPort();
         int  writeSerialLeds(struct LedProperties led_properties);
         int readSerialLeds(uint8_t *res);
+        int sendMessage(uint8_t message[]);
 
 
 
