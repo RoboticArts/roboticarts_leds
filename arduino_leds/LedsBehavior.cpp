@@ -184,9 +184,25 @@
   
   void LedsBehavior::customTurn(struct LedProperties* led_properties){
   
+    int zone = led_properties->end_led - led_properties->init_led;
+    int side = floor(LED_STRIP_SIZE/4);
+    int start_part;
+
+    if (zone%2 == 0 && side%2 == 0)
+       start_part = side/2 - zone/2;
     
-    int start_parts[4] = {TURN_MIN_1, TURN_MIN_2, TURN_MIN_3, TURN_MIN_4};
-    int part_size =  TURN_SIZE;
+    if (zone%2 == 0 && side%2 != 0)
+       start_part = ceil(side/2) - zone/2;  
+
+    if (zone%2 != 0 && side%2 == 0)
+       start_part = side/2 - ceil(zone/2); 
+
+    if (zone%2 != 0 && side%2 != 0)
+       start_part = ceil(side/2) - zone/2;
+       
+    
+    int start_parts[4] = {start_part, start_part+side, start_part+side*2, start_part+side*3};
+    int part_size =  zone;
     int number_parts = 4;
     
     if (led_properties->direction)
@@ -232,7 +248,7 @@
 // ======================= Select Behavior ========================= // 
 
 
-  void LedsBehavior::setBehavior(struct LedProperties led_properties){
+  void LedsBehavior::runBehavior(struct LedProperties led_properties){
 
      switch(led_properties.command){
     
