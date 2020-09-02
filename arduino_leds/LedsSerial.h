@@ -15,25 +15,24 @@ class LedsSerial{
     void reset();
     void getLedProperties(struct LedProperties *led_properties);
     void begin();
+    void runSerial(int current_command);
     
   private:
 
-    int state = -1;
-    int type = -1;
-    uint8_t res[10] = {};
-    uint8_t last_res[10] = {};
+     
+    struct LedProperties _led_properties;
+    uint8_t _last_response[MSG_SIZE] = {};
     bool firstCommand = false;
     bool clearLeds = false;
 
     int checkResponse(uint8_t response[]);
     int readResponse(uint8_t response[]);
-    uint8_t getTypeResponse(uint8_t response[]);
+    void writeResponse(int command);
 
-   // Reponse types
-    enum reponse_type {COMMAND_RESPONSE, LED_RESPONSE, RETURN_RESPONSE ,SAME_RESPONSE};
+    void updateLedProperties(uint8_t response[]);
+    void sendCurrentCommand(int current_command);
 
 
-    
 };
 
 #endif

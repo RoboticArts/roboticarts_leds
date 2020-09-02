@@ -11,24 +11,34 @@
 
 
   int LedsSerial::readResponse(uint8_t response[]){
-
+     
      int status = -1;
+     uint8_t res[MSG_SIZE] = {};
     
-     if (Serial.available() >= 10) { 
-        
+     if (Serial.available() >= MSG_SIZE) { 
+       
          //Clear buffer
-         memset(response,'0', 10);
+         memset(response,'0', MSG_SIZE);
   
          //Read data
-         Serial.readBytes(response, 10);
+         Serial.readBytes(res, MSG_SIZE);
+
+         memcpy(response, res, MSG_SIZE);  // response = res         
 
          status = checkResponse(res);
-         Serial.print(status);
+        
 
     }
 
    return status;
+  
+  }
 
+  void LedsSerial::writeResponse(int command){
+
+      Serial.write(RESPONSE_OK);
+      Serial.write(command);
+      Serial.write(TAIL);
   }
 
   
@@ -36,11 +46,14 @@
 
       int status = -1;
       
-      if (response[9] == TAIL){
+      if (response[0] == HEADER && response[11] == TAIL){
     
-          if(response[0] >= FOWARD && response[0] <= CUSTOM_LED_D)
+          if(response[2] >= FOWARD && response[2] <= CUSTOM_LED_D)
               status = RESPONSE_OK;
           else
+              status = UNKNOWN_COMMAND;
+
+          if(response[1] != READ && response[1] != WRITE)
               status = UNKNOWN_COMMAND;
       }
     
@@ -51,95 +64,97 @@
   } 
 
 
-  
-  uint8_t LedsSerial::getTypeResponse(uint8_t response[]){
-  
-    int type=-1;
-       
-    if (memcmp(last_res, response, 10) == 0){
-        type = SAME_RESPONSE;
-    }
-
-    if (type != SAME_RESPONSE){
-  
-        if (response[0] >= FOWARD && response[0] <= CUSTOM_TURN)
-            type = COMMAND_RESPONSE; 
-        else 
-            type = LED_RESPONSE;
-    
-        memcpy(last_res, response, 10);  // last_res = response
-    }
-     
-    return type;
-
- }
 
  bool LedsSerial::isFirstCommand(){
 
     bool isFirst = this->firstCommand;
     this->firstCommand = false;
-    
+
     return isFirst;
  }
 
 
  bool LedsSerial::clearRequest(){
 
-  bool request;
-
-  if(this->clearLeds == true){
-      request = true;
-      
-  }
-  else
-      request = false;
-  
+  bool request = this->clearLeds;
   this->clearLeds = false;
-  
-  return request; 
+
+  return request;
  }
-  
+
+
  void LedsSerial::getLedProperties(struct LedProperties *led_properties){
-    
-     state = readResponse(res);
-    
-     if (state == RESPONSE_OK){
-    
-        type = this->getTypeResponse(res);
-       
-        if (type == COMMAND_RESPONSE)
-            this->clearLeds = true;
+
+      led_properties->command  = _led_properties.command;
+      led_properties->init_led = _led_properties.init_led;
+      led_properties->end_led  = _led_properties.end_led;
+      led_properties->color = _led_properties.color;
+      led_properties->time = _led_properties.time;
+      led_properties->direction = _led_properties.direction;
       
-        if (type != SAME_RESPONSE || type != RETURN_RESPONSE){
+ }
+  
+ void LedsSerial::updateLedProperties(uint8_t response[]){
 
-            if (type == COMMAND_RESPONSE)
-                firstCommand = true;
-            
-            led_properties->command  = res[0];
-            led_properties->init_led = res[1];
-            led_properties->end_led  = res[2];
-            led_properties->color = ( (uint32_t(res[3]) << 16) | (uint32_t(res[4]) << 8) ) | uint32_t(res[5]);
-            led_properties->time =  (uint16_t(res[6]) << 8) | res[7];
-            led_properties->direction = res[8];
-        }
-    
-        if(type == RETURN_RESPONSE)
-            Serial.print(led_properties->command); 
+      _led_properties.command  = response[2];
+      _led_properties.init_led = response[3];
+      _led_properties.end_led  = response[4];
+      _led_properties.color = ( (uint32_t(response[5]) << 16) | (uint32_t(response[6]) << 8) ) | uint32_t(response[7]);
+      _led_properties.time =  (uint16_t(response[8]) << 8) | response[9];
+      _led_properties.direction = response[10];
 
-     }       
+      if(response[2] <= CUSTOM_TURN)
+        clearLeds = true;         
  }
 
 
-  void LedsSerial::reset(){
-    
-    state = -1;
-    type = -1;
-    memset(res,'0', 10);
-    memset(last_res,'0', 10);
-    firstCommand = true;
-    clearLeds = false;
-  }
- 
+void LedsSerial::sendCurrentCommand(int current_command){
 
+    Serial.write(RESPONSE_OK);
+    Serial.write(current_command);
+    Serial.write(TAIL);
+
+}
+
+void LedsSerial::reset(){
+  
+  memset(_last_response,'0', MSG_SIZE);
+  firstCommand = false;
+  clearLeds = false;
+
+}
+
+
+ void LedsSerial::runSerial(int current_command){
+
+  int state = -1;
+  uint8_t res[MSG_SIZE] = {};
  
+  state = readResponse(res);
+
+  if(state == RESPONSE_OK){
+  
+    if(memcmp(_last_response, res, MSG_SIZE) != 0){
+  
+      firstCommand = true;
+      memcpy(_last_response, res, MSG_SIZE);  // _last_response = res 
+
+      if (res[1] == WRITE){
+          updateLedProperties(res); 
+          writeResponse(current_command);
+      }
+      if (res[1] == READ){
+          sendCurrentCommand(current_command);              
+      }
+    }
+    else{
+      writeResponse(current_command);
+    }   
+    
+  }
+  else if (state == RESPONSE_ERROR || state == UNKNOWN_COMMAND){
+    Serial.write(state);
+  }
+
+ }
         
