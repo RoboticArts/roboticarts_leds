@@ -20,16 +20,6 @@
   } 
   
   
-  void LedsRobot::setLeds(struct LedProperties led_properties){
-  
-    leds_behavior->setBehavior(led_properties);
-  
-  }
-  
-  void LedsRobot::getLeds(struct LedProperties *led_properties){
-    
-     leds_serial->getLedProperties(led_properties);
-  }
   
   void LedsRobot::resetLeds(){
   
@@ -46,6 +36,8 @@
   }
   
   void LedsRobot::run(){
+
+    leds_serial->runSerial(led_properties.command);
     
     switch(arduino_state){
   
@@ -61,7 +53,7 @@
           break;
       
       case READY:
-      
+    
           if(leds_serial->isFirstCommand())
             arduino_state = RUN;
   
@@ -73,6 +65,8 @@
           break;
   
       case RUN:
+
+          leds_serial->getLedProperties(&led_properties);
   
           if(leds_serial->clearRequest())
               leds_behavior->clearBehavior();
@@ -94,10 +88,8 @@
   
           break;
     }
-    
-   getLeds(&led_properties);
-   setLeds(led_properties);
+   
+   leds_behavior->runBehavior(led_properties);
    updateLeds(20);
-    
-    
+     
   }

@@ -34,8 +34,6 @@ class LedsRobot{
     LedProperties last_led_properties;
   
     void updateLeds(int refresh_time);
-    void setLeds(struct LedProperties led_properties);
-    void getLeds(struct LedProperties *led_properties);
     void resetLeds();
   
 };
