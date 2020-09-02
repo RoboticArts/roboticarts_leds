@@ -14,7 +14,7 @@ class LedsBehavior : public LedsInterface{
     void begin();
     void update();
     void reset();
-    void setBehavior(struct LedProperties led_properties);
+    void runBehavior(struct LedProperties led_properties);
     void clearBehavior();
 
   private:
