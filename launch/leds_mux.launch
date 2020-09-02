@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch>
+    
+    <arg name="leds_mux_config" default="$(find roboticarts_leds)/config/leds_mux.yaml" />
+    <arg name="cmd_leds_output" default="roboticarts_leds/set_leds_signal" />
+
+    <node pkg="roboticarts_leds" type="leds_mux_node" name="leds_mux" output="screen">
+        <rosparam command="load" file="$(arg leds_mux_config)" />
+        <param name="cmd_leds_output" value="$(arg cmd_leds_output)" /> 
+    </node>
+
+
+</launch>

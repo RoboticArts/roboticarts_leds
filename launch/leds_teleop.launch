@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="cmd_vel_topic" default="cmd_vel" />
+    <arg name="cmd_led_service" default="roboticarts_teleop/cmd_leds" />
+    <arg name="velocity_threshold" default= "0.05" />
+
+    <node pkg="roboticarts_leds" type="leds_teleop_node" name="leds_teleop" output="screen">
+        <param name="cmd_vel_topic" value="$(arg cmd_vel_topic)" />
+        <param name="cmd_led_service" value="$(arg cmd_led_service)" />
+        <param name="velocity_threshold" value="$(arg velocity_threshold)" />
+    </node>
+
+
+</launch>
