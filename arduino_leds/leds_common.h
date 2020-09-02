@@ -40,6 +40,11 @@
 #define RESPONSE_OK 0x01
 #define RESPONSE_ERROR 0x02
 #define UNKNOWN_COMMAND 0x03
+
+#define MSG_SIZE 12
+#define HEADER 0x99
+#define WRITE 0x01
+#define READ 0x02
 #define TAIL 0x23
 
 // Commands
