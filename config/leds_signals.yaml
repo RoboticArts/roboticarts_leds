@@ -15,13 +15,13 @@ leds_signals:
   - name: "TURN_LEFT"
     behavior: "shift_turn_left"
     zone: [1, 9]
-    color: [0, 40, 20]
+    color: [0, 10, 5]
     time: 100
     
   - name: "TURN_RIGHT"
     behavior: "shift_turn_right"
     zone: [1, 9]
-    color: [0, 40, 20]
+    color: [0, 10, 5]
     time: 100
 
   - name: "OMNI_LEFT"
