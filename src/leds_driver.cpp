@@ -77,14 +77,15 @@ void LedsDriver::readRosParams(){
 bool LedsDriver::setLightCallback(roboticarts_leds::SetLight::Request& req,
                                       roboticarts_leds::SetLight::Response& res)
 {
-  uint8_t message[4] = {};
+  uint8_t message[MSG_SIZE] = {};
   int status = -1;
 
   //Build message
   message[0] = HEADER;           // Header
   message[1] = WRITE;            // Mode
-  message[2] = req.brightness;   // Brightness
-	message[3] = TAIL;             // EOL
+  message[2] = CUSTOM_LED_A;     // Command
+  message[5] = req.brightness;   // Brightness
+	message[11] = TAIL;            // EOL
 
   status = sendMessage(message);
 
