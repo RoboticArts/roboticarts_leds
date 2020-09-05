@@ -1,12 +1,17 @@
 
   #include "LedsSerial.h"
-
+  
+  LedsSerial::LedsSerial(){
+    
+   this->provisional_led_brightness = new LedBrightness (4 , 10 ); // 4 leds, pin 10 
+  
+  } 
 
   void LedsSerial::begin(){
     
-     Serial.begin(115200);
+    Serial.begin(115200);
     Serial.setTimeout(200);
-    
+    provisional_led_brightness->begin();
   }
 
 
@@ -48,7 +53,7 @@
       
       if (response[0] == HEADER && response[11] == TAIL){
     
-          if(response[2] >= FOWARD && response[2] <= CUSTOM_LED_D)
+          if(response[2] >= CUSTOM_PAINT && response[2] <= CURRENT_COMMAND)
               status = RESPONSE_OK;
           else
               status = UNKNOWN_COMMAND;
@@ -74,15 +79,6 @@
  }
 
 
- bool LedsSerial::clearRequest(){
-
-  bool request = this->clearLeds;
-  this->clearLeds = false;
-
-  return request;
- }
-
-
  void LedsSerial::getLedProperties(struct LedProperties *led_properties){
 
       led_properties->command  = _led_properties.command;
@@ -102,9 +98,7 @@
       _led_properties.color = ( (uint32_t(response[5]) << 16) | (uint32_t(response[6]) << 8) ) | uint32_t(response[7]);
       _led_properties.time =  (uint16_t(response[8]) << 8) | response[9];
       _led_properties.direction = response[10];
-
-      if(response[2] <= CUSTOM_TURN)
-        clearLeds = true;         
+         
  }
 
 
@@ -120,7 +114,6 @@ void LedsSerial::reset(){
   
   memset(_last_response,'0', MSG_SIZE);
   firstCommand = false;
-  clearLeds = false;
 
 }
 
@@ -132,8 +125,10 @@ void LedsSerial::reset(){
  
   state = readResponse(res);
 
+  provisional_led_brightness->provisionalLedBrightness(res);
+
   if(state == RESPONSE_OK){
-  
+
     if(memcmp(_last_response, res, MSG_SIZE) != 0){
   
       firstCommand = true;
@@ -152,8 +147,9 @@ void LedsSerial::reset(){
     }   
     
   }
-  else if (state == RESPONSE_ERROR || state == UNKNOWN_COMMAND){
-    Serial.write(state);
+  else if (state == RESPONSE_ERROR  || state == UNKNOWN_COMMAND ){
+    if (res[2] != 0x0D)         // ADDED UNTIL SEPARATE LED BRIGHTNESS CLASS FROM THIS CODE 
+        Serial.write(state);                            
   }
 
  }

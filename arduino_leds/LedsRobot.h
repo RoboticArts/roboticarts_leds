@@ -31,7 +31,6 @@ class LedsRobot{
 
     // Led properties
     LedProperties led_properties;
-    LedProperties last_led_properties;
   
     void updateLeds(int refresh_time);
     void resetLeds();

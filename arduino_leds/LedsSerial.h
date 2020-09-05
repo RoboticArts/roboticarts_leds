@@ -5,13 +5,16 @@
 #include <Arduino.h>
 #include "leds_common.h"
 
+// Provisional
+#include "LedBrightness.h"
+
 
 class LedsSerial{ 
 
   public:
 
+    LedsSerial();
     bool isFirstCommand();
-    bool clearRequest();
     void reset();
     void getLedProperties(struct LedProperties *led_properties);
     void begin();
@@ -23,7 +26,6 @@ class LedsSerial{
     struct LedProperties _led_properties;
     uint8_t _last_response[MSG_SIZE] = {};
     bool firstCommand = false;
-    bool clearLeds = false;
 
     int checkResponse(uint8_t response[]);
     int readResponse(uint8_t response[]);
@@ -32,7 +34,7 @@ class LedsSerial{
     void updateLedProperties(uint8_t response[]);
     void sendCurrentCommand(int current_command);
 
-
+    LedBrightness* provisional_led_brightness;
 };
 
 #endif

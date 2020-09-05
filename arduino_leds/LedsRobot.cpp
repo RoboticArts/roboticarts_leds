@@ -68,9 +68,6 @@
 
           leds_serial->getLedProperties(&led_properties);
   
-          if(leds_serial->clearRequest())
-              leds_behavior->clearBehavior();
-          
           if(!Serial){
              arduino_state = EXIT;
              led_properties.command = EXIT;

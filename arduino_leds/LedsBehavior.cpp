@@ -21,13 +21,13 @@
   // ==========================   Basic behaviors   ========================== //
 
 
-  void LedsBehavior::paintLeds(int start_led, int end_led, uint32_t color, bool enableBrightness){
+  void LedsBehavior::paintLeds(int start_led, int end_led, uint32_t color){
   
-    LedsInterface::fillLeds(start_led, end_led, color, enableBrightness);  
+    LedsInterface::fillLeds(start_led, end_led, color);  
   
   }
    
-  void LedsBehavior::blinkLeds(int start_led, int end_led, uint32_t color, int blink_time, bool enableBrightness){
+  void LedsBehavior::blinkLeds(int start_led, int end_led, uint32_t color, int blink_time){
   
     blink_time_now = millis();
   
@@ -37,7 +37,7 @@
   
       if (blink_state == LOW){
   
-        LedsInterface::fillLeds(start_led, end_led, color, enableBrightness);
+        LedsInterface::fillLeds(start_led, end_led, color);
         blink_state = HIGH;
   
       }
@@ -97,45 +97,6 @@
 
   // ==========================   Composed behaviors   ========================== //
 
-
-  
-  void LedsBehavior::turnLeds(String direction){
-  
-    int start_parts[4] = {TURN_MIN_1, TURN_MIN_2, TURN_MIN_3, TURN_MIN_4};
-    int part_size =  TURN_SIZE;
-    int number_parts = 4;
-    
-    if (direction.equals("left"))
-      shiftParts(start_parts, number_parts, part_size, RED, LED_SHIFT_TIME, "left");
-    else
-      shiftParts(start_parts, number_parts, part_size, RED, LED_SHIFT_TIME, "right");
-  }
-  
-  
-  void LedsBehavior::moveLeds(String direction){
-    
-    if (direction.equals("foward"))   
-      blinkLeds(MOVE_FOWARD_MIN ,MOVE_FOWARD_MAX, RED, 500); 
-    else
-      blinkLeds(MOVE_BACKWARD_MIN ,MOVE_BACKWARD_MAX, RED, 500);
-      
-  }
-  
-  void LedsBehavior::omniLeds(String direction){
-    
-    if (direction.equals("left"))
-      blinkLeds(OMNI_LEFT_MIN , OMNI_LEFT_MAX , RED, 500); 
-  
-    else{
-      blinkLeds(OMNI_RIGHT_MIN , OMNI_RIGHT_MAX , RED, 500);
-  
-    }
-    
-  }
-  
-  void LedsBehavior::emergencyLeds(){
-    blinkLeds(0, LED_STRIP_SIZE-1, RED, 500);
-  }
   
   void LedsBehavior::bootingLeds(){
     blinkLeds(0, LED_STRIP_SIZE-1, WHITE, 500);
@@ -156,7 +117,7 @@
   void LedsBehavior::customPaint(struct LedProperties* led_properties){
   
     // Disable brightness ans set color
-    paintLeds(led_properties->init_led, led_properties->end_led, led_properties->color, false);
+    paintLeds(led_properties->init_led, led_properties->end_led, led_properties->color);
     
     
   }
@@ -165,7 +126,7 @@
   void LedsBehavior::customBlink(struct LedProperties* led_properties){
   
     // Disable brightness ans set color and blik time
-    blinkLeds(led_properties->init_led, led_properties->end_led, led_properties->color, led_properties->time, false);
+    blinkLeds(led_properties->init_led, led_properties->end_led, led_properties->color, led_properties->time);
   }
   
   void LedsBehavior::customShift(struct LedProperties* led_properties){
@@ -213,25 +174,6 @@
   }
 
 
-  // ======================= Led Behavior ========================= //
-  
-  void LedsBehavior::customLed(int led, uint32_t color){
-
-    // Provisional: access to low level leds
-    LedsBehavior::_setPixelColor(LED_STRIP_SIZE + led, color);
-    LedsBehavior::_show();
-
-   
-  }
-  
-  
-  void LedsBehavior::clearBehavior(){
-  
-    clear();
-    reset();
-  
-  }
-
   void LedsBehavior::reset(){
   
     blink_time_now = 0;
@@ -250,26 +192,44 @@
 
   void LedsBehavior::runBehavior(struct LedProperties led_properties){
 
+     if (isNewBehavior(led_properties))
+         clearBehavior();
+
      switch(led_properties.command){
     
-      case FOWARD:       moveLeds("foward");     break;
-      case BACKWARD:     moveLeds("backward");   break;
-      case TURN_LEFT:    turnLeds("left");       break;
-      case TURN_RIGHT:   turnLeds("right");      break;
-      case OMNI_LEFT:    omniLeds("left");       break;
-      case OMNI_RIGHT:   omniLeds("right");      break;
-      case EMERGENCY:    emergencyLeds();        break;
       case CUSTOM_PAINT: customPaint(&led_properties); break;
       case CUSTOM_BLINK: customBlink(&led_properties); break;
       case CUSTOM_SHIFT: customShift(&led_properties); break;
       case CUSTOM_TURN:  customTurn (&led_properties); break;
-      case CUSTOM_LED_A: customLed(LED_A, led_properties.color); led_properties = last_led_properties; break;
-      case CUSTOM_LED_B: customLed(LED_B, led_properties.color); led_properties = last_led_properties; break;
-      case CUSTOM_LED_C: customLed(LED_C, led_properties.color); led_properties = last_led_properties; break;
-      case CUSTOM_LED_D: customLed(LED_D, led_properties.color); led_properties = last_led_properties; break;
-      case BOOTING: bootingLeds(); break;
-      case READY: readyLeds(); break;
-      case EXIT: exitLeds(); break;
+      case BOOTING:  bootingLeds(); break;
+      case READY:  readyLeds(); break;
+      case EXIT:  exitLeds(); break;
      }
       
+  }
+
+
+  void LedsBehavior::clearBehavior(){
+
+    LedsInterface::clear();
+    reset();
+  
+  }
+
+  bool LedsBehavior::isNewBehavior (struct LedProperties led_properties){
+      
+    bool isNew = false;
+
+      if (led_properties.command != last_led_properties.command) isNew = true;
+      if (led_properties.init_led != last_led_properties.init_led) isNew = true;
+      if (led_properties.end_led != last_led_properties.end_led) isNew = true;
+      if (led_properties.color != last_led_properties.color) isNew = true;
+      if (led_properties.time != last_led_properties.time) isNew = true;
+      if (led_properties.direction != last_led_properties.direction) isNew = true;
+      
+      if (isNew)
+         last_led_properties = led_properties;
+            
+      return isNew;
+       
   }

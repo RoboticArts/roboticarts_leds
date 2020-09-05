@@ -15,7 +15,6 @@ class LedsBehavior : public LedsInterface{
     void update();
     void reset();
     void runBehavior(struct LedProperties led_properties);
-    void clearBehavior();
 
   private:
         
@@ -33,15 +32,11 @@ class LedsBehavior : public LedsInterface{
     struct LedProperties last_led_properties;
  
     // Basic behaviors
-    void paintLeds(int start_led, int end_led, uint32_t color, bool enableBrightness = true);
-    void blinkLeds(int start_led, int end_led, uint32_t color, int blink_time = LED_BLINK_TIME, bool enableBrightness = true);
+    void paintLeds(int start_led, int end_led, uint32_t color);
+    void blinkLeds(int start_led, int end_led, uint32_t color, int blink_time);
     void shiftParts(int start_parts[], int number_parts, int part_size,  uint32_t color, int shift_time, String direction);
 
     // Composed behaviors
-    void turnLeds(String direction);
-    void moveLeds(String direction);
-    void omniLeds(String direction);
-    void emergencyLeds();
     void bootingLeds();
     void readyLeds();
     void exitLeds();
@@ -52,8 +47,9 @@ class LedsBehavior : public LedsInterface{
     void customShift(struct LedProperties* led_properties);
     void customTurn(struct LedProperties* led_properties);
 
-    // Custom led
-    void customLed(int led, uint32_t color);
+    // Clear behavior
+    void clearBehavior();
+    bool isNewBehavior (struct LedProperties led_properties);
 
 
   }; 

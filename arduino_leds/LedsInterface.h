@@ -14,10 +14,7 @@ class LedsInterface{
     void begin();
     void update();
     void clear();
-    void fillLeds(int start_led, int end_led, uint32_t color, bool enableBrightness = true);
-    void _setPixelColor(int led, uint32_t color);
-    void _show();
-
+    void fillLeds(int start_led, int end_led, uint32_t color);
     
   private:
 
@@ -25,7 +22,6 @@ class LedsInterface{
     
     uint32_t led_buffer[LED_STRIP_SIZE] = {};
 
-    uint32_t getColorWithBrightness(uint32_t color);
 
 };
 
