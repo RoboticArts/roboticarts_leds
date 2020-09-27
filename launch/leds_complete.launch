@@ -16,7 +16,7 @@
 
     <!-- Launch teleop leds -->
     <include file="$(find roboticarts_leds)/launch/leds_teleop.launch">
-        <arg name="cmd_vel_topic" value="roboticarts_base_control/cmd_vel" />
+        <arg name="cmd_vel_topic" value="mobile_base_controller/cmd_vel" />
         <arg name="cmd_led_service" value="roboticarts_teleop/cmd_leds" />
         <arg name="velocity_threshold" value="$(arg velocity_threshold)" />
     </include>
