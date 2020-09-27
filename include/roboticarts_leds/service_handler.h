@@ -120,8 +120,8 @@ void ServiceHandler::getPriority(){
 
   //Save priortiy 
   priority_table[this->priority] = this->priority;
-  ROS_ERROR("%d ---------- GET", this->priority);
-  printPriorityTable();
+  //ROS_ERROR("%d ---------- GET", this->priority); // Only debug
+  //printPriorityTable();                           // Only debug
 }
 
 
