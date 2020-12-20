@@ -3,9 +3,11 @@
 
     <arg name="serial_port" default="/dev/ttyACM0" />
     <arg name="baudrate" default="115200" />
+    <arg name="leds_signals_config" default="$(find roboticarts_leds)/config/leds_signals.yaml" />
+
 
     <node pkg="roboticarts_leds" type="leds_driver_node" name="leds_driver" output="screen">
-        <rosparam command="load" file="$(find roboticarts_leds)/config/leds_signals.yaml" />
+        <rosparam command="load" file="$(arg leds_signals_config)" />
         <param name="serial_port" value="$(arg serial_port)" />
         <param name="baudrate" value="$(arg baudrate)" />
     </node>
