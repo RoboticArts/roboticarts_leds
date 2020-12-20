@@ -3,43 +3,43 @@ leds_signals:
   - name: "FORWARD"
     behavior: "blink"
     zone: [3, 18]
-    color: [0, 10, 5]
+    color: [0, 10, 0]
     time: 500
 
   - name: "BACKWARD"
     behavior: "blink"
     zone: [23, 38]
-    color: [0, 10, 5]
+    color: [0, 10, 0]
     time: 500
 
   - name: "TURN_LEFT"
     behavior: "shift_turn_left"
     zone: [1, 9]
-    color: [0, 10, 5]
+    color: [0, 10, 0]
     time: 100
     
   - name: "TURN_RIGHT"
     behavior: "shift_turn_right"
     zone: [1, 9]
-    color: [0, 10, 5]
+    color: [0, 10, 0]
     time: 100
 
   - name: "OMNI_LEFT"
     behavior: "blink"
     zone: [32, 9]
-    color: [0, 10, 5]
+    color: [0, 10, 0]
     time: 500
 
   - name: "OMNI_RIGHT"
     behavior: "blink"
     zone: [12, 29]
-    color: [0, 10, 4]
+    color: [0, 10, 0]
     time: 500
 
   - name: "STOP"
     behavior: "paint"
     zone: [1,40]
-    color: [0, 10, 5]
+    color: [0, 10, 0]
     time: 0
 
   - name: "EMERGENCY"
